@@ -16,7 +16,7 @@ from ReplayMemory import *
 
 NUM_STEPS = 200
 
-NUM_EPISODES_INIT = 5
+NUM_EPISODES_INIT = 500
 
 NUM_EPISODES = 1000000
 BATCH_SIZE = 128
@@ -33,6 +33,9 @@ MIN_Q = 1 / ( 1 - GAMMA) * MIN_REWARD
 NUM_EPISODES_EVAL = 40
 
 K = 4
+
+num_interaction_episodes = 40
+num_learning_steps = 40
 
 def main():
 
@@ -122,58 +125,62 @@ def main():
 
         print(f"Episode: {episode}")
 
-        state, _ = env.reset()
-        
+        #
+        # Interact
+        #
 
-
-        for step in tqdm.tqdm(range(NUM_STEPS)):
- 
-
-            #
-            # Interact
-            #
-
-            actor.eval()
-            critic.eval()
-
-            state_tensor = torch.tensor(state, dtype=torch.float32).to(device)
-            goal_tensor = torch.tensor(env.goal, dtype=torch.float32).to(device)
-            state_tensor = torch.concat([state_tensor, goal_tensor])
-            state_tensor = state_tensor.unsqueeze(dim=0) # add batch dim
-
-            with torch.no_grad():
-                action = actor(state_tensor)
-
-            noise = torch.randn_like(action)
-            action = (action + noise).clamp(0, 1)
-            action = action.cpu().numpy()
-            action = action[0] # remove batch dim
-
-            next_state, reward, terminated, truncated, info = env.step(action)
-
-            done = terminated or truncated
-
-            replay_memory.add(
-                state,
-                env.goal,
-                action,
-                reward,
-                next_state,
-                done
-            )
-
-           
-            if done:
-                break
+        print("Interaction:")
+        for _ in tqdm.tqdm(range(num_interaction_episodes)):
             
-            state = next_state
 
-            #
-            # Learn
-            #
-      
+            state, _ = env.reset()
+
+            for step in range(NUM_STEPS):
+    
+                actor.eval()
+                critic.eval()
+
+                state_tensor = torch.tensor(state, dtype=torch.float32).to(device)
+                goal_tensor = torch.tensor(env.goal, dtype=torch.float32).to(device)
+                state_tensor = torch.concat([state_tensor, goal_tensor])
+                state_tensor = state_tensor.unsqueeze(dim=0) # add batch dim
+
+                with torch.no_grad():
+                    action = actor(state_tensor)
+
+                noise = torch.randn_like(action)
+                action = (action + noise).clamp(0, 1)
+                action = action.cpu().numpy()
+                action = action[0] # remove batch dim
+
+                next_state, reward, terminated, truncated, info = env.step(action)
+
+                done = terminated or truncated
+
+                replay_memory.add(
+                    state,
+                    env.goal,
+                    action,
+                    reward,
+                    next_state,
+                    done
+                )
+
+            
+                if done:
+                    break
+                
+                state = next_state
+
+        #
+        # Learn
+        #
+
+        print("Learning:")
+        for _ in tqdm.tqdm(range(num_learning_steps)):
 
             # sample batch
+
             states_b, goals_b, actions_b, rewards_b, next_states_b, dones_b = replay_memory.sample(BATCH_SIZE)
 
             states_b = torch.tensor(states_b).to(device)
@@ -200,7 +207,7 @@ def main():
                 target_q = torch.clip(target_q, min=MIN_Q, max=0)
 
             q_values = critic(states_b, actions_b)
-  
+    
             critic_loss = torch.nn.functional.mse_loss(q_values, target_q)
             critic.optimizer.zero_grad()
             critic_loss.backward()
@@ -222,7 +229,7 @@ def main():
             torch.nn.utils.clip_grad_norm_(actor.parameters(), max_norm=1.0)
             actor.optimizer.step()
 
-         
+            
             #
             # Update metrics
             #
@@ -231,7 +238,7 @@ def main():
             critic.loss_metric.update(critic_loss)
 
 
-        
+            
             for target_param, param in zip(target_actor.parameters(), actor.parameters()):
                 target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
 

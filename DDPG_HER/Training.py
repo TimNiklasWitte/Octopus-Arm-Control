@@ -16,7 +16,7 @@ from ReplayMemory import *
 
 NUM_STEPS = 200
 
-NUM_EPISODES_INIT = 500
+NUM_EPISODES_INIT = 5
 
 NUM_EPISODES = 1000000
 BATCH_SIZE = 128
@@ -33,6 +33,9 @@ MIN_Q = 1 / ( 1 - GAMMA) * MIN_REWARD
 NUM_EPISODES_EVAL = 40
 
 K = 4
+
+num_interaction_episodes = 40
+num_learning_steps = 40
 
 def main():
 
@@ -151,68 +154,100 @@ def main():
 
         print(f"Episode: {episode}")
 
-        state, _ = env.reset()
-        
+        #
+        # Interact
+        #
 
-        state_list = []
-        hand_pos_list = []
-        action_list = []
-        reward_list = []
-        next_state_list = []
-        done_list = []
+        print("Interaction:")
+        for _ in tqdm.tqdm(range(num_interaction_episodes)):
 
-        for step in tqdm.tqdm(range(NUM_STEPS)):
- 
-
-            #
-            # Interact
-            #
-
-            actor.eval()
-            critic.eval()
-
-            state_tensor = torch.tensor(state, dtype=torch.float32).to(device)
-            goal_tensor = torch.tensor(env.goal, dtype=torch.float32).to(device)
-            state_tensor = torch.concat([state_tensor, goal_tensor])
-            state_tensor = state_tensor.unsqueeze(dim=0) # add batch dim
-
-            with torch.no_grad():
-                action = actor(state_tensor)
-
-            noise = torch.randn_like(action)
-            action = (action + noise).clamp(0, 1)
-            action = action.cpu().numpy()
-            action = action[0] # remove batch dim
-
-            next_state, reward, terminated, truncated, info = env.step(action)
-
-            done = terminated or truncated
-
-            replay_memory.add(
-                state,
-                env.goal,
-                action,
-                reward,
-                next_state,
-                done
-            )
-
-    
-            state_list.append(state)
-            hand_pos_list.append(info["hand_pos"])
-            action_list.append(action)
-            reward_list.append(reward)
-            next_state_list.append(next_state)
-            done_list.append(done)
-
-            if done:
-                break
+            state, _ = env.reset()
             
-            state = next_state
 
-            #
-            # Learn
-            #
+            state_list = []
+            hand_pos_list = []
+            action_list = []
+            reward_list = []
+            next_state_list = []
+            done_list = []
+
+            for step in range(NUM_STEPS):
+    
+
+                #
+                # Interact
+                #
+
+                actor.eval()
+                critic.eval()
+
+                state_tensor = torch.tensor(state, dtype=torch.float32).to(device)
+                goal_tensor = torch.tensor(env.goal, dtype=torch.float32).to(device)
+                state_tensor = torch.concat([state_tensor, goal_tensor])
+                state_tensor = state_tensor.unsqueeze(dim=0) # add batch dim
+
+                with torch.no_grad():
+                    action = actor(state_tensor)
+
+                noise = torch.randn_like(action)
+                action = (action + noise).clamp(0, 1)
+                action = action.cpu().numpy()
+                action = action[0] # remove batch dim
+
+                next_state, reward, terminated, truncated, info = env.step(action)
+
+                done = terminated or truncated
+
+                replay_memory.add(
+                    state,
+                    env.goal,
+                    action,
+                    reward,
+                    next_state,
+                    done
+                )
+
+        
+                state_list.append(state)
+                hand_pos_list.append(info["hand_pos"])
+                action_list.append(action)
+                reward_list.append(reward)
+                next_state_list.append(next_state)
+                done_list.append(done)
+
+                if done:
+                    break
+                
+                state = next_state
+
+            # Hindsight Replay
+            for k in range(K):
+                for i, (state, hand_pos, action, reward, next_state, done) in \
+                        enumerate(zip(state_list, hand_pos_list, action_list, reward_list, next_state_list, done_list)):
+
+                    if i + 1 >= len(next_state_list):
+                        continue
+
+                    # Sample new goal
+                    future_idx = np.random.randint(i + 1, len(next_state_list))
+                    new_goal = hand_pos_list[future_idx]
+
+                    # Goal reached?
+                    dist = np.linalg.norm(hand_pos - new_goal)
+                    goal_reached = dist < EPSILON
+
+                    new_reward = 0 if goal_reached else -1
+                    new_done = goal_reached 
+
+                    replay_memory.add(state, new_goal, action, new_reward, next_state, new_done)
+
+
+        #
+        # Learn
+        #
+
+        print("Learning:")
+        for _ in tqdm.tqdm(range(num_learning_steps)):
       
 
             # sample batch
@@ -281,27 +316,7 @@ def main():
                 target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
 
 
-        # Hindsight Replay
-        for k in range(K):
-            for i, (state, hand_pos, action, reward, next_state, done) in \
-                    enumerate(zip(state_list, hand_pos_list, action_list, reward_list, next_state_list, done_list)):
 
-                if i + 1 >= len(next_state_list):
-                    continue
-
-                # Sample new goal
-                future_idx = np.random.randint(i + 1, len(next_state_list))
-                new_goal = hand_pos_list[future_idx]
-
-                # Goal reached?
-                dist = np.linalg.norm(hand_pos - new_goal)
-                goal_reached = dist < EPSILON
-
-                new_reward = 0 if goal_reached else -1
-                new_done = goal_reached 
-
-                replay_memory.add(state, new_goal, action, new_reward, next_state, new_done)
-            
         #
         # Evaluation
         #
