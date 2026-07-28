@@ -1,0 +1,262 @@
+<mujoco model="octopus_arm">
+  <compiler angle="radian" coordinate="local"/>
+  <option gravity="0 0 0" timestep="0.001" integrator="RK4"/>
+
+  <visual>
+    <global offwidth="1440" offheight="768" azimuth="90" elevation="-45"/>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+    <material name="base_mat" rgba="0.2 0.2 0.2 1"/>
+    <material name="segment_mat" rgba="0.8 0.3 0.3 0.7"/>
+  </asset>
+
+  <default>
+    <geom type="cylinder" material="segment_mat" condim="3" density="500"/> 
+    <joint type="ball" armature="0.01" damping="0.5" stiffness="0.1"/>
+    <general dyntype="muscle" gaintype="muscle" biastype="muscle" ctrlrange="0 1"/>
+  </default>
+
+  <worldbody>
+    <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1"/>
+    <geom name="floor" type="plane" pos="0 0 -2" size="10 10 0.1" material="groundplane"/>
+    <camera name="front" pos="3.5 0 0.2" xyaxes="0 1 0 0 0 1"/>
+    <body name="base" pos="0 0 1">
+      <geom type="sphere" size="0.12" material="base_mat"/>
+      
+      <body name="seg1" pos="0 0 -0.15">
+        <joint name="j1"/>
+        <geom fromto="0 0 0.15 0 0 -0.15" size="0.11 0.10"/>
+        <site name="s1_1" pos="0.11 0 0"/>
+        <site name="s1_2" pos="0.055 0.0953 0"/>
+        <site name="s1_3" pos="-0.055 0.0953 0"/>
+        <site name="s1_4" pos="-0.11 0 0"/>
+        <site name="s1_5" pos="-0.055 -0.0953 0"/>
+        <site name="s1_6" pos="0.055 -0.0953 0"/>
+
+        <body name="seg2" pos="0 0 -0.28">
+          <joint name="j2"/>
+          <geom fromto="0 0 0.14 0 0 -0.14" size="0.10 0.09"/>
+          <site name="s2_1" pos="0.10 0 0"/>
+          <site name="s2_2" pos="0.05 0.0866 0"/>
+          <site name="s2_3" pos="-0.05 0.0866 0"/>
+          <site name="s2_4" pos="-0.10 0 0"/>
+          <site name="s2_5" pos="-0.05 -0.0866 0"/>
+          <site name="s2_6" pos="0.05 -0.0866 0"/>
+
+          <body name="seg3" pos="0 0 -0.26">
+            <joint name="j3"/>
+            <geom fromto="0 0 0.13 0 0 -0.13" size="0.09 0.08"/>
+            <site name="s3_1" pos="0.09 0 0"/>
+            <site name="s3_2" pos="0.045 0.0779 0"/>
+            <site name="s3_3" pos="-0.045 0.0779 0"/>
+            <site name="s3_4" pos="-0.09 0 0"/>
+            <site name="s3_5" pos="-0.045 -0.0779 0"/>
+            <site name="s3_6" pos="0.045 -0.0779 0"/>
+
+            <body name="seg4" pos="0 0 -0.24">
+              <joint name="j4"/>
+              <geom fromto="0 0 0.12 0 0 -0.12" size="0.08 0.07"/>
+              <site name="s4_1" pos="0.08 0 0"/>
+              <site name="s4_2" pos="0.04 0.0693 0"/>
+              <site name="s4_3" pos="-0.04 0.0693 0"/>
+              <site name="s4_4" pos="-0.08 0 0"/>
+              <site name="s4_5" pos="-0.04 -0.0693 0"/>
+              <site name="s4_6" pos="0.04 -0.0693 0"/>
+
+              <body name="seg5" pos="0 0 -0.22">
+                <joint name="j5"/>
+                <geom fromto="0 0 0.11 0 0 -0.11" size="0.07 0.06"/>
+                <site name="s5_1" pos="0.07 0 0"/>
+                <site name="s5_2" pos="0.035 0.0606 0"/>
+                <site name="s5_3" pos="-0.035 0.0606 0"/>
+                <site name="s5_4" pos="-0.07 0 0"/>
+                <site name="s5_5" pos="-0.035 -0.0606 0"/>
+                <site name="s5_6" pos="0.035 -0.0606 0"/>
+
+                <body name="seg6" pos="0 0 -0.20">
+                  <joint name="j6"/>
+                  <geom fromto="0 0 0.10 0 0 -0.10" size="0.06 0.05"/>
+                  <site name="s6_1" pos="0.06 0 0"/>
+                  <site name="s6_2" pos="0.03 0.0520 0"/>
+                  <site name="s6_3" pos="-0.03 0.0520 0"/>
+                  <site name="s6_4" pos="-0.06 0 0"/>
+                  <site name="s6_5" pos="-0.03 -0.0520 0"/>
+                  <site name="s6_6" pos="0.03 -0.0520 0"/>
+
+                  <body name="seg7" pos="0 0 -0.18">
+                    <joint name="j7"/>
+                    <geom fromto="0 0 0.09 0 0 -0.09" size="0.05 0.04"/>
+                    <site name="s7_1" pos="0.05 0 0"/>
+                    <site name="s7_2" pos="0.025 0.0433 0"/>
+                    <site name="s7_3" pos="-0.025 0.0433 0"/>
+                    <site name="s7_4" pos="-0.05 0 0"/>
+                    <site name="s7_5" pos="-0.025 -0.0433 0"/>
+                    <site name="s7_6" pos="0.025 -0.0433 0"/>
+
+                    <body name="seg8" pos="0 0 -0.16">
+                      <joint name="j8"/>
+                      <geom fromto="0 0 0.08 0 0 -0.08" size="0.04 0.03"/>
+                      <site name="s8_1" pos="0.04 0 0"/>
+                      <site name="s8_2" pos="0.02 0.0346 0"/>
+                      <site name="s8_3" pos="-0.02 0.0346 0"/>
+                      <site name="s8_4" pos="-0.04 0 0"/>
+                      <site name="s8_5" pos="-0.02 -0.0346 0"/>
+                      <site name="s8_6" pos="0.02 -0.0346 0"/>
+
+                      <body name="seg9" pos="0 0 -0.14">
+                        <joint name="j9"/>
+                        <geom fromto="0 0 0.07 0 0 -0.07" size="0.03 0.02"/>
+                        <site name="s9_1" pos="0.03 0 0"/>
+                        <site name="s9_2" pos="0.015 0.0260 0"/>
+                        <site name="s9_3" pos="-0.015 0.0260 0"/>
+                        <site name="s9_4" pos="-0.03 0 0"/>
+                        <site name="s9_5" pos="-0.015 -0.0260 0"/>
+                        <site name="s9_6" pos="0.015 -0.0260 0"/>
+
+                        <body name="seg10" pos="0 0 -0.12">
+                          <joint name="j10"/>
+                          <geom fromto="0 0 0.06 0 0 -0.06" size="0.02 0.01"/>
+                          <site name="tip" pos="0 0 -0.06" size="0.015" rgba="1 0 0 1"/>
+                          <site name="s10_1" pos="0.02 0 0"/>
+                          <site name="s10_2" pos="0.01 0.0173 0"/>
+                          <site name="s10_3" pos="-0.01 0.0173 0"/>
+                          <site name="s10_4" pos="-0.02 0 0"/>
+                          <site name="s10_5" pos="-0.01 -0.0173 0"/>
+                          <site name="s10_6" pos="0.01 -0.0173 0"/>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    <site name="tgt" type="sphere" size="0.05" pos="0.05 0 0.5" rgba="0 255 0 1"/>
+  </worldbody>
+
+<!--18 muscle paths: 6 longitudinal muscles (blue), 6 helix muscles turning to the left side (purple), 6 helix muscles turning to the left side (green) -->
+
+  <tendon>
+    <spatial name="muscle_long_1" width="0.005" rgba="0 0 1 0.8">
+      <site site="s1_1"/> <site site="s2_1"/> <site site="s3_1"/> <site site="s4_1"/> <site site="s5_1"/>
+      <site site="s6_1"/> <site site="s7_1"/> <site site="s8_1"/> <site site="s9_1"/> <site site="s10_1"/>
+    </spatial>
+    
+    <spatial name="muscle_long_2" width="0.005" rgba="0 0 1 0.8">
+      <site site="s1_2"/> <site site="s2_2"/> <site site="s3_2"/> <site site="s4_2"/> <site site="s5_2"/>
+      <site site="s6_2"/> <site site="s7_2"/> <site site="s8_2"/> <site site="s9_2"/> <site site="s10_2"/>
+    </spatial>
+    
+    <spatial name="muscle_long_3" width="0.005" rgba="0 0 1 0.8">
+      <site site="s1_3"/> <site site="s2_3"/> <site site="s3_3"/> <site site="s4_3"/> <site site="s5_3"/>
+      <site site="s6_3"/> <site site="s7_3"/> <site site="s8_3"/> <site site="s9_3"/> <site site="s10_3"/>
+    </spatial>
+    
+    <spatial name="muscle_long_4" width="0.005" rgba="0 0 1 0.8">
+      <site site="s1_4"/> <site site="s2_4"/> <site site="s3_4"/> <site site="s4_4"/> <site site="s5_4"/>
+      <site site="s6_4"/> <site site="s7_4"/> <site site="s8_4"/> <site site="s9_4"/> <site site="s10_4"/>
+    </spatial>
+
+    <spatial name="muscle_long_5" width="0.005" rgba="0 0 1 0.8">
+      <site site="s1_5"/> <site site="s2_5"/> <site site="s3_5"/> <site site="s4_5"/> <site site="s5_5"/>
+      <site site="s6_5"/> <site site="s7_5"/> <site site="s8_5"/> <site site="s9_5"/> <site site="s10_5"/>
+    </spatial>
+
+    <spatial name="muscle_long_6" width="0.005" rgba="0 0 1 0.8">
+      <site site="s1_6"/> <site site="s2_6"/> <site site="s3_6"/> <site site="s4_6"/> <site site="s5_6"/>
+      <site site="s6_6"/> <site site="s7_6"/> <site site="s8_6"/> <site site="s9_6"/> <site site="s10_6"/>
+    </spatial>
+
+    <spatial name="muscle_helix_left_1" width="0.004" rgba="0.5 0 0.5 0.8">
+      <site site="s1_1"/> <site site="s2_2"/> <site site="s3_3"/> <site site="s4_4"/> <site site="s5_5"/>
+      <site site="s6_6"/> <site site="s7_1"/> <site site="s8_2"/> <site site="s9_3"/> <site site="s10_4"/>
+    </spatial>
+
+    <spatial name="muscle_helix_left_2" width="0.004" rgba="0.5 0 0.5 0.8">
+      <site site="s1_2"/> <site site="s2_3"/> <site site="s3_4"/> <site site="s4_5"/> <site site="s5_6"/>
+      <site site="s6_1"/> <site site="s7_2"/> <site site="s8_3"/> <site site="s9_4"/> <site site="s10_5"/>
+    </spatial>
+
+    <spatial name="muscle_helix_left_3" width="0.004" rgba="0.5 0 0.5 0.8">
+      <site site="s1_3"/> <site site="s2_4"/> <site site="s3_5"/> <site site="s4_6"/> <site site="s5_1"/>
+      <site site="s6_2"/> <site site="s7_3"/> <site site="s8_4"/> <site site="s9_5"/> <site site="s10_6"/>
+    </spatial>
+
+    <spatial name="muscle_helix_left_4" width="0.004" rgba="0.5 0 0.5 0.8">
+      <site site="s1_4"/> <site site="s2_5"/> <site site="s3_6"/> <site site="s4_1"/> <site site="s5_2"/>
+      <site site="s6_3"/> <site site="s7_4"/> <site site="s8_5"/> <site site="s9_6"/> <site site="s10_1"/>
+    </spatial>
+
+    <spatial name="muscle_helix_left_5" width="0.004" rgba="0.5 0 0.5 0.8">
+      <site site="s1_5"/> <site site="s2_6"/> <site site="s3_1"/> <site site="s4_2"/> <site site="s5_3"/>
+      <site site="s6_4"/> <site site="s7_5"/> <site site="s8_6"/> <site site="s9_1"/> <site site="s10_2"/>
+    </spatial>
+
+    <spatial name="muscle_helix_left_6" width="0.004" rgba="0.5 0 0.5 0.8">
+      <site site="s1_6"/> <site site="s2_1"/> <site site="s3_2"/> <site site="s4_3"/> <site site="s5_4"/>
+      <site site="s6_5"/> <site site="s7_6"/> <site site="s8_1"/> <site site="s9_2"/> <site site="s10_3"/>
+    </spatial>
+    
+    <spatial name="muscle_helix_right_1" width="0.004" rgba="0 0.5 0 0.8">
+      <site site="s1_1"/> <site site="s2_6"/> <site site="s3_5"/> <site site="s4_4"/> <site site="s5_3"/>
+      <site site="s6_2"/> <site site="s7_1"/> <site site="s8_6"/> <site site="s9_5"/> <site site="s10_4"/>
+    </spatial>
+
+    <spatial name="muscle_helix_right_2" width="0.004" rgba="0 0.5 0 0.8">
+      <site site="s1_2"/> <site site="s2_1"/> <site site="s3_6"/> <site site="s4_5"/> <site site="s5_4"/>
+      <site site="s6_3"/> <site site="s7_2"/> <site site="s8_1"/> <site site="s9_6"/> <site site="s10_5"/>
+    </spatial>
+
+    <spatial name="muscle_helix_right_3" width="0.004" rgba="0 0.5 0 0.8">
+      <site site="s1_3"/> <site site="s2_2"/> <site site="s3_1"/> <site site="s4_6"/> <site site="s5_5"/>
+      <site site="s6_4"/> <site site="s7_3"/> <site site="s8_2"/> <site site="s9_1"/> <site site="s10_6"/>
+    </spatial>
+
+    <spatial name="muscle_helix_right_4" width="0.004" rgba="0 0.5 0 0.8">
+      <site site="s1_4"/> <site site="s2_3"/> <site site="s3_2"/> <site site="s4_1"/> <site site="s5_6"/>
+      <site site="s6_5"/> <site site="s7_4"/> <site site="s8_3"/> <site site="s9_2"/> <site site="s10_1"/>
+    </spatial>
+
+    <spatial name="muscle_helix_right_5" width="0.004" rgba="0 0.5 0 0.8">
+      <site site="s1_5"/> <site site="s2_4"/> <site site="s3_3"/> <site site="s4_2"/> <site site="s5_1"/>
+      <site site="s6_6"/> <site site="s7_5"/> <site site="s8_4"/> <site site="s9_3"/> <site site="s10_2"/>
+    </spatial>
+
+    <spatial name="muscle_helix_right_6" width="0.004" rgba="0 0.5 0 0.8">
+      <site site="s1_6"/> <site site="s2_5"/> <site site="s3_4"/> <site site="s4_3"/> <site site="s5_2"/>
+      <site site="s6_1"/> <site site="s7_6"/> <site site="s8_5"/> <site site="s9_4"/> <site site="s10_3"/>
+    </spatial>
+  </tendon>
+
+  <actuator>
+    <muscle name="act_long_1" tendon="muscle_long_1"/>
+    <muscle name="act_long_2" tendon="muscle_long_2"/>
+    <muscle name="act_long_3" tendon="muscle_long_3"/>
+    <muscle name="act_long_4" tendon="muscle_long_4"/>
+    <muscle name="act_long_5" tendon="muscle_long_5"/>
+    <muscle name="act_long_6" tendon="muscle_long_6"/>
+
+    <muscle name="act_helix_left_1" tendon="muscle_helix_left_1"/>
+    <muscle name="act_helix_left_2" tendon="muscle_helix_left_2"/>
+    <muscle name="act_helix_left_3" tendon="muscle_helix_left_3"/>
+    <muscle name="act_helix_left_4" tendon="muscle_helix_left_4"/>
+    <muscle name="act_helix_left_5" tendon="muscle_helix_left_5"/>
+    <muscle name="act_helix_left_6" tendon="muscle_helix_left_6"/>
+
+    <muscle name="act_helix_right_1" tendon="muscle_helix_right_1"/>
+    <muscle name="act_helix_right_2" tendon="muscle_helix_right_2"/>
+    <muscle name="act_helix_right_3" tendon="muscle_helix_right_3"/>
+    <muscle name="act_helix_right_4" tendon="muscle_helix_right_4"/>
+    <muscle name="act_helix_right_5" tendon="muscle_helix_right_5"/>
+    <muscle name="act_helix_right_6" tendon="muscle_helix_right_6"/>
+  </actuator>
+</mujoco>
