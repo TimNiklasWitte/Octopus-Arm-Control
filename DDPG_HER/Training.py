@@ -189,7 +189,7 @@ def main():
                 with torch.no_grad():
                     action = actor(state_tensor)
 
-                noise = torch.randn_like(action)
+                noise = 0.1 * torch.randn_like(action)
                 action = (action + noise).clamp(0, 1)
                 action = action.cpu().numpy()
                 action = action[0] # remove batch dim
