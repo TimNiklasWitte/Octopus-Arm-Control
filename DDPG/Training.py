@@ -283,7 +283,7 @@ def main():
 
                 done = terminated or truncated
                 
-                if reward == 0:
+                if done:
                     cnt_goal_reached += 1
 
                     num_steps_to_goal_list.append(step)
