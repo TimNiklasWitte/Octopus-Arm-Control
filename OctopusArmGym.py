@@ -15,6 +15,8 @@ class OctopusArmGym(gym.Env):
         
         self.sparse_reward = sparse_reward
 
+    
+
         # Load MuJoCo model
         self.model = mujoco.MjModel.from_xml_path("./../octopus_arm_6sites_6each.xml")
         self.data = mujoco.MjData(self.model)
@@ -35,6 +37,22 @@ class OctopusArmGym(gym.Env):
             dtype=np.float32
         )
         
+        #
+        # Render
+        #
+
+        self.renderer = mujoco.Renderer(
+            self.model,
+            height=480,
+            width=640,
+        )
+
+        self.target_site_id = mujoco.mj_name2id(
+            self.model,
+            mujoco.mjtObj.mjOBJ_SITE,
+            "tgt"
+        )
+
 
         #
         # Get id of end effector
@@ -72,8 +90,13 @@ class OctopusArmGym(gym.Env):
         n_steps = np.random.randint(50, 200)
         for i in range(n_steps):
 
-            self.data.ctrl[:] = self.action_space.sample()
+            #self.data.ctrl[:] = self.action_space.sample()
 
+            self.data.ctrl[:] = self.np_random.uniform(
+                low=self.action_space.low,
+                high=self.action_space.high,
+            )
+             
             for _ in range(self.n_substeps):
                 mujoco.mj_step(self.model, self.data)
 
@@ -206,8 +229,14 @@ class OctopusArmGym(gym.Env):
         return self.state, reward, terminated, truncated, info
     
     
-    def render(self):
-        return None
+    def render(self, camera="front"):
+        
+        self.model.site_pos[self.target_site_id] = self.goal
+        mujoco.mj_forward(self.model, self.data)
+
+
+        self.renderer.update_scene(self.data, camera=camera)
+        return self.renderer.render()
     
     def close(self):
-        pass
+        self.renderer.close()
