@@ -1,0 +1,90 @@
+from LoadDataframe import *
+from matplotlib import pyplot as plt
+
+import seaborn as sns
+
+def main():
+
+    algorithm_name_list = ["DDPG", "DDPG_HER"]
+
+    df_list = []
+    for algorithm_name in algorithm_name_list:
+        log_dir = f"../{algorithm_name}/logs"
+        if algorithm_name == "SAC_HER":
+            log_dir = f"../{algorithm_name}/logs_5"
+
+        df = load_dataframe(log_dir)
+        df = df.loc[:, ["avg number steps to goal", "avg min distance", "success rate"]]
+
+        df = df.loc[:1000]
+        if algorithm_name == "DDPG_HER":
+            df["algorithm"] = "DDPG + HER"
+        else:
+            df["algorithm"] = algorithm_name
+
+        df_list.append(df)
+    
+    df = pd.concat(df_list)
+
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+
+    sns.lineplot(data=df,
+                x="step",
+                y="avg number steps to goal",
+                hue="algorithm",
+                alpha=0.7,
+                ax=axes[0])
+
+    sns.lineplot(data=df,
+                x="step",
+                y="avg min distance",
+                hue="algorithm",
+                alpha=0.7,
+                ax=axes[1])
+
+    sns.lineplot(data=df,
+                x="step",
+                y="success rate",
+                hue="algorithm",
+                alpha=0.7,
+                ax=axes[2])
+
+    for ax in axes:
+        ax.grid(True)
+
+    axes[0].set_title("Average number of steps for reaching the goal")
+    axes[0].set_xlabel("Step")
+    axes[0].set_ylabel("Number of steps")
+
+    axes[1].set_title("Average minimum distance to goal")
+    axes[1].set_xlabel("Step")
+    axes[1].set_ylabel("Distance")
+
+    axes[2].set_title("Success rate")
+    axes[2].set_xlabel("Step")
+    axes[2].set_ylabel("Success rate")
+    
+    for ax in axes:
+        ax.get_legend().remove()
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels,
+            loc='lower center',
+            bbox_to_anchor=(0.5, 0.02),
+            ncol=3,
+            frameon=True)
+
+
+    plt.tight_layout(rect=[0, 0.12, 1, 1])
+
+
+    plt.savefig("./plots/Training_metrics_Paper.pdf", dpi=200)
+   
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt received")
