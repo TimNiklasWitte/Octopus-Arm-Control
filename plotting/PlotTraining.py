@@ -19,11 +19,14 @@ def main():
         df = df.loc[:1000]
         df["algorithm"] = algorithm_name
 
+        df.loc[df["success rate"] == 0, "avg number steps to goal"] = pd.NA
+
         df_list.append(df)
     
     df = pd.concat(df_list)
 
-
+    df = df.reset_index()
+    
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
 
